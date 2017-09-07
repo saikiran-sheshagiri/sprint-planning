@@ -72,6 +72,8 @@ io.on('connection', function (socket) {
 			"clients": clients,
 			"topic": topicInfo
 		});
+
+		io.emit('enable-pointing');
 	})
 
 	socket.on('chat message', function (msg) {
@@ -92,6 +94,8 @@ io.on('connection', function (socket) {
 			"clients": clients,
 			"topic": {name: details.topic}
 		});
+
+		socket.emit('disable-points');
 	});
 
 	socket.on('show-points', function(){
@@ -107,6 +111,8 @@ io.on('connection', function (socket) {
 			"clients": clients,
 			"topic": null
 		});
+
+		io.emit('disable-points');
 	});
 
 });

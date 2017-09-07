@@ -303,9 +303,6 @@
 						}
 					});
 
-					//TODO: check if the user is participant from local storage
-					$("#particiapnt_panel div.participant-card").css("background-color", "#337ab7");
-					$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
 				}
 				else {
 					$("#no_topic").show();
@@ -313,9 +310,6 @@
 					$("#user_story_number").text('');
 					$('#participant_list_points').empty();
 
-					//TODO: check if the user is participant from local storage
-					$("#particiapnt_panel div.participant-card").css("background-color", "#484343");
-					$("#particiapnt_panel div.participant-card").css("cursor", "auto");
 				}
 			});
 
@@ -360,12 +354,22 @@
 							points: points
 						});
 
-						//TODO: check if the user is participant from local storage
-					$("#particiapnt_panel div.participant-card").css("background-color", "#484343");
-					$("#particiapnt_panel div.participant-card").css("cursor", "auto");
 					}
 				}
-			})
+			});
+
+			socket.on('enable-pointing', function() {
+
+					//TODO: check if the user is participant from local storage
+					$("#particiapnt_panel div.participant-card").css("background-color", "#337ab7");
+					$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
+			});
+
+			socket.on('disable-points', function () {
+				//TODO: remove this and figure out a way to remove the points
+				$("#particiapnt_panel div.participant-card").css("background-color", "#484343");
+				$("#particiapnt_panel div.participant-card").css("cursor", "auto");
+			});
 		});
 	</script>
 </body>
