@@ -106,6 +106,7 @@
 					</div>
 				</div>
 				<div class="panel panel-default" id="particiapnt_panel" style="display: none">
+					<div class="panel-heading">Point cards</div>
 					<div class="panel-body">
 						<div class="row">
 							<div class="participant-points col-sm-2">
@@ -358,6 +359,10 @@
 							topic: $("#user_story_number").text(),
 							points: points
 						});
+
+						//TODO: check if the user is participant from local storage
+					$("#particiapnt_panel div.participant-card").css("background-color", "#484343");
+					$("#particiapnt_panel div.participant-card").css("cursor", "auto");
 					}
 				}
 			})
