@@ -1,0 +1,300 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Socket.IO chat</title>
+	<style>
+		#messages {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		#messages li {
+			padding: 5px 10px;
+		}
+
+		#messages li:nth-child(odd) {
+			background: #eee;
+		}
+
+		.card {
+			border: gray 1px solid;
+			height: 150px;
+			background-color: gray;
+		}
+
+		.participant-card {
+			border: gray 1px solid;
+			height: 150px;
+			background-color: gray;
+		}
+
+		.participant-card p {
+			text-align: center;
+			font-size: 30px;
+			color: white;
+		}
+
+		.participant-points{
+			padding: 5px;
+		}
+
+		.participant-points h4{
+			color: white;
+			border-bottom: 1px solid black;
+		}
+
+		.points {
+			height: 50px;
+			text-align: center;
+			font-size: 40px;
+			display: none;
+		}
+
+		.points-received {
+			background-color: green;
+		}
+	</style>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	 crossorigin="anonymous">
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<nav class="navbar navbar-dark bg-primary" style="border-radius: 0px;">
+		<span class="navbar-brand">Skynet planning</span>
+		<span class="navbar-text pull-right" id="welcome_text"></span>
+	</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-8">
+				<div class="panel panel-default">
+					<div class="panel-heading">Topic/User story - <span id="user_story_number"></span></div>
+					<div class="panel-body">
+						<div id="participant_list_points" class="row">
+							
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default" id="particiapnt_panel" style="display: none">
+					<div class="panel-body">
+						<div class="row">
+							<div class="participant-points col-sm-2">
+								<div class="participant-card"><p>1</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>2</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>3</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>5</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>8</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>13</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>20</p></div>
+							</div>
+							<div class="participant-points col-sm-2">
+									<div class="participant-card"><p>?</p></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Admin panel/ Scrum master section -->
+				<div class="panel panel-default" id="scrum_master_panel" style="display:none">
+					<div class="panel-heading">Scrum master actions</div>
+					<div class="panel-body">
+						<div class="form-inline">
+							<label>Set topic/user story</label>
+							<input id="txt_topic" type="text" class="form-control" placeholder="Enter topic/user story number" />
+							<button class="btn btn-primary" id="btnSetTopic">Send</button>
+							<button class="btn btn-danger pull-right" id="btnResetTopic">Reset</button>
+						</div>
+						<hr>
+						<p>Click reveal to see the points from participants</p>
+						<p class="text-center">
+							<button class="btn btn-success btn-lg" id="btnReveal">Reveal</button>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<div class="panel panel-default">
+					<div class="panel-heading">Participants</div>
+					<div class="panel-body">
+						<ul id="participant_list"></ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Modal -->
+	<div id="myModal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Login</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<input type="text" class="form-control" id="userName" placeholder="Enter your name" />
+
+						</div>
+						<div class="form-group">
+							<div class="form-check form-check-inline">
+								<label class="form-check-label">
+											<input class="form-check-input" type="checkbox" id="isScrumMaster" value="true"> I'm scrum master
+										</label>
+							</div>
+						</div>
+					</form>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" id="btnUserLogin" class="btn btn-default" data-dismiss="modal">Go</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	 crossorigin="anonymous"></script>
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.4/lodash.min.js"></script>
+	<script>
+		var socket = io();
+
+		$(window).load(function () {
+			$('#myModal').modal('show');
+		});
+
+		$(function () {
+			$('form').submit(function () {
+				socket.emit('chat message', $('#m').val());
+				$('#m').val('');
+				return false;
+			});
+
+
+			socket.on('chat message', function (msg) {
+				$('#messages').append($('<li>').text(msg));
+			});
+
+			socket.on('welcome', function (user) {
+				$("#welcome_text").text('Welcome, ' + user.user_name);
+
+				if(user.isHost) {
+					$("#scrum_master_panel").show();
+				} else {
+					$("#particiapnt_panel").show();
+				}
+			});
+
+			socket.on('new-user-joined', function (user) {
+				toastr.info(user.user_name + ' joined the scrum.');
+			});
+
+			socket.on('participant-list', function(participants) {
+
+				$('#participant_list').empty();
+				_.each(participants, function (participant) {
+					$('#participant_list').append($('<li>').text(participant.user_name));
+				});
+			});
+
+			socket.on('topic', function(details) {
+
+				if(details.topic != null) {
+				$("#user_story_number").text(details.topic.name);
+				$('#participant_list_points').empty();
+				_.each(details.clients, function (participant) {
+
+					if(!participant.isHost) {
+						var ele = '<div class="col-sm-2 participant-points"><div class="card"><h4>' 
+									+ participant.user_name 
+									+ '</h4><p class="points">' + participant.points + '</p></div></div>'
+						
+						if(participant.points != 0) {
+							ele = '<div class="col-sm-2 participant-points"><div class="card points-received"><h4>' 
+									+ participant.user_name 
+									+ '</h4><p class="points">' + participant.points + '</p></div></div>';
+						}
+
+						$('#participant_list_points').append($(ele));
+					}
+				});
+
+				//TODO: check if the user is participant from local storage
+				$("#particiapnt_panel div.participant-card").css("background-color", "blue");
+				$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
+			}
+			else{
+				$("#user_story_number").text('');
+				$('#participant_list_points').empty();
+			}
+			});
+
+			$("#btnUserLogin").click(function () {
+				
+				socket.emit('user-login-details', {
+					name: $("#userName").val(),
+					host: $("#isScrumMaster").prop('checked')
+				});
+			});
+
+			$("#btnSetTopic").click(function() {
+				socket.emit('set-topic', {
+					name: $("#txt_topic").val()
+				});
+			});
+
+			$("#btnResetTopic").click(function(){
+				socket.emit('reset-topic');
+			})
+
+			$("#btnReveal").click(function(){
+				socket.emit('show-points');
+			});
+
+			socket.on('show particiapnt points', function() {
+				$('.points').css('display', 'block');
+			})
+
+			$(".participant-card").click(function(ele){
+				var enabled = ($(this).css("background-color") === 'rgb(0, 0, 255)');
+				if(enabled) {
+					var points = $(this).children(":first").text();
+					var r = confirm("Confirm your points - " + points);
+					if(r) {
+						//TODO: send to socket
+						socket.emit('send-points', {
+							socket_id: socket.id,
+							topic: $("#user_story_number").text(),
+							points: points
+						});
+					}
+				}
+			})
+		});
+	</script>
+</body>
+
+</html>
