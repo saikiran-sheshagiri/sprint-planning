@@ -69,6 +69,14 @@
 		.all-participants li {
 			text-transform: capitalize;
 		}
+		
+		#welcome_text {
+			text-transform: uppercase;
+		}
+
+		#host_joined {
+			display: none;
+		}
 	</style>
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
 	 crossorigin="anonymous">
@@ -169,7 +177,6 @@
 		</div>
 	</div>
 
-
 	<!-- Modal -->
 	<div id="myModal" class="modal fade" role="dialog">
 		<div class="modal-dialog">
@@ -180,6 +187,9 @@
 					<h4 class="modal-title">Login</h4>
 				</div>
 				<div class="modal-body">
+					<div class="alert alert-danger" id="host_joined">
+						<strong>Host already joined!</strong> If you are the real host, ask your participants to refresh and join as an attendee.
+					</div>
 					<form>
 						<div class="form-group">
 							<input type="text" class="form-control" id="userName" placeholder="Enter your name" />
@@ -196,7 +206,7 @@
 
 				</div>
 				<div class="modal-footer">
-					<button type="button" id="btnUserLogin" class="btn btn-primary" data-dismiss="modal">Join</button>
+					<button type="button" id="btnUserLogin" class="btn btn-primary">Join</button>
 				</div>
 			</div>
 
@@ -227,7 +237,13 @@
 				$('#messages').append($('<li>').text(msg));
 			});
 
+			socket.on('host already joined', function () {
+				$("#host_joined").show();
+			})
+
 			socket.on('welcome', function (user) {
+				$("#myModal").modal('hide');
+
 				$("#welcome_text").text('Welcome, ' + user.user_name);
 
 				if (user.isHost) {
@@ -238,14 +254,20 @@
 			});
 
 			socket.on('new-user-joined', function (user) {
-				toastr.info(user.user_name + ' joined the scrum.');
+				toastr.error(user.user_name + ' joined the planning.');
+			});
+
+			socket.on('user-left', function(user) {
+				toastr.error(user.user_name + ' left planning.');
 			});
 
 			socket.on('participant-list', function (participants) {
 
 				$('#participant_list').empty();
 				_.each(participants, function (participant) {
-					$('#participant_list').append($('<li>').text(participant.user_name));
+					var textToDisplay = (participant.isHost ? participant.user_name + ' (Host)' : participant.user_name);
+
+					$('#participant_list').append($('<li>').text(textToDisplay));
 				});
 			});
 

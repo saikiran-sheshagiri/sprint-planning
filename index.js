@@ -18,24 +18,35 @@ io.on('connection', function (socket) {
 	console.log(socket.id);
 
 	socket.on('user-login-details', function (userInfo) {
-		var client = {
-			"id": socket.id,
-			"user_name": userInfo.name,
-			"isHost": userInfo.host,
-			"points": 0
+		console.log(userInfo);
+
+		var isHostAvailable = _.find(clients, { 'isHost': true });
+
+		if(userInfo.host && isHostAvailable) {
+			socket.emit('host already joined');
+			console.log('host already exist');
+		} else {
+
+			var client = {
+				"id": socket.id,
+				"user_name": userInfo.name,
+				"isHost": userInfo.host,
+				"points": 0
+			}
+			console.log(client);
+
+			clients.push(client);
+
+			socket.emit('welcome', client);
+
+			socket
+				.broadcast
+				.emit('new-user-joined', client);
+
+			
+			io.emit('participant-list', clients);
+			console.log('new user joined');
 		}
-		console.log(client);
-
-		clients.push(client);
-
-		socket.emit('welcome', client);
-
-		socket
-			.broadcast
-			.emit('new-user-joined', client);
-
-		
-		io.emit('participant-list', clients);
 	});
 
 	
@@ -44,10 +55,15 @@ io.on('connection', function (socket) {
 
 	socket.on('disconnect', function () {
 		console.log('user disconnected');
-
+		var user;
 		_.remove(clients, function(client) {
+			user = client;
 			return client.id === socket.id;
 		});
+
+		socket
+		.broadcast
+		.emit('user-left', user);
 	});
 
 	socket.on('set-topic', function (topicInfo){
