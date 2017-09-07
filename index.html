@@ -18,6 +18,11 @@
 			background: #eee;
 		}
 
+		.bg-app {
+			background-color: #b73641;
+			color: white;
+		}
+
 		.card {
 			border: #484343 1px solid;
 			height: 150px;
@@ -84,7 +89,7 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-dark bg-primary" style="border-radius: 0px;">
+	<nav class="navbar navbar-dark bg-app" style="border-radius: 0px;">
 		<span class="navbar-brand">Skynet planning</span>
 		<span class="navbar-text pull-right" id="welcome_text"></span>
 	</nav>
@@ -254,11 +259,11 @@
 			});
 
 			socket.on('new-user-joined', function (user) {
-				toastr.error(user.user_name + ' joined the planning.');
+				toastr.info(user.user_name + ' joined the planning.');
 			});
 
 			socket.on('user-left', function(user) {
-				toastr.error(user.user_name + ' left planning.');
+				toastr.info(user.user_name + ' left planning.');
 			});
 
 			socket.on('participant-list', function (participants) {
