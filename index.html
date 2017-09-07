@@ -89,9 +89,8 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-dark bg-app" style="border-radius: 0px;">
+	<nav class="navbar navbar-dark bg-primary" style="border-radius: 0px;">
 		<span class="navbar-brand">Skynet planning</span>
-		<span class="navbar-text pull-right" id="welcome_text"></span>
 	</nav>
 	<div class="container">
 		<div class="row">
@@ -173,6 +172,9 @@
 			</div>
 			<div class="col-sm-4">
 				<div class="panel panel-default">
+					<div class="panel-body bg-success">Welcome, <span id="welcome_text"></span></div>
+				</div>
+				<div class="panel panel-default">
 					<div class="panel-heading">Participants</div>
 					<div class="panel-body">
 						<ul id="participant_list" class="all-participants"></ul>
@@ -249,7 +251,7 @@
 			socket.on('welcome', function (user) {
 				$("#myModal").modal('hide');
 
-				$("#welcome_text").text('Welcome, ' + user.user_name);
+				$("#welcome_text").text(user.user_name);
 
 				if (user.isHost) {
 					$("#scrum_master_panel").show();
