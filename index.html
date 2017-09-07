@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Socket.IO chat</title>
+	<title>Scrum planning</title>
 	<style>
 		#messages {
 			list-style-type: none;
@@ -19,15 +19,21 @@
 		}
 
 		.card {
-			border: gray 1px solid;
+			border: #484343 1px solid;
 			height: 150px;
-			background-color: gray;
+			background-color: #484343;
+		}
+
+		.card p {
+			font-size: 18px;
+			text-transform: capitalize;
+			background-color: white;
 		}
 
 		.participant-card {
-			border: gray 1px solid;
+			border: #484343 1px solid;
 			height: 150px;
-			background-color: gray;
+			background-color: #484343;
 		}
 
 		.participant-card p {
@@ -36,11 +42,11 @@
 			color: white;
 		}
 
-		.participant-points{
+		.participant-points {
 			padding: 5px;
 		}
 
-		.participant-points h4{
+		.participant-points h4 {
 			color: white;
 			border-bottom: 1px solid black;
 		}
@@ -53,7 +59,15 @@
 		}
 
 		.points-received {
-			background-color: green;
+			background-color: #76d276;
+		}
+
+		.topic-info {
+			font-size: 20px;
+		}
+
+		.all-participants li {
+			text-transform: capitalize;
 		}
 	</style>
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
@@ -70,10 +84,12 @@
 		<div class="row">
 			<div class="col-sm-8">
 				<div class="panel panel-default">
-					<div class="panel-heading">Topic/User story - <span id="user_story_number"></span></div>
+					<div class="panel-heading">Topic/User story <span id="user_story_number" class="topic-info"></span></div>
 					<div class="panel-body">
 						<div id="participant_list_points" class="row">
-							
+						</div>
+						<div class="container" id="no_topic">
+							<p>Wait for scrum master to select the topic or story</p>
 						</div>
 					</div>
 				</div>
@@ -81,28 +97,44 @@
 					<div class="panel-body">
 						<div class="row">
 							<div class="participant-points col-sm-2">
-								<div class="participant-card"><p>1</p></div>
+								<div class="participant-card">
+									<p>1</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>2</p></div>
+								<div class="participant-card">
+									<p>2</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>3</p></div>
+								<div class="participant-card">
+									<p>3</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>5</p></div>
+								<div class="participant-card">
+									<p>5</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>8</p></div>
+								<div class="participant-card">
+									<p>8</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>13</p></div>
+								<div class="participant-card">
+									<p>13</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>20</p></div>
+								<div class="participant-card">
+									<p>20</p>
+								</div>
 							</div>
 							<div class="participant-points col-sm-2">
-									<div class="participant-card"><p>?</p></div>
+								<div class="participant-card">
+									<p>?</p>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -130,7 +162,7 @@
 				<div class="panel panel-default">
 					<div class="panel-heading">Participants</div>
 					<div class="panel-body">
-						<ul id="participant_list"></ul>
+						<ul id="participant_list" class="all-participants"></ul>
 					</div>
 				</div>
 			</div>
@@ -145,7 +177,6 @@
 			<!-- Modal content-->
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal">&times;</button>
 					<h4 class="modal-title">Login</h4>
 				</div>
 				<div class="modal-body">
@@ -165,7 +196,7 @@
 
 				</div>
 				<div class="modal-footer">
-					<button type="button" id="btnUserLogin" class="btn btn-default" data-dismiss="modal">Go</button>
+					<button type="button" id="btnUserLogin" class="btn btn-primary" data-dismiss="modal">Join</button>
 				</div>
 			</div>
 
@@ -187,12 +218,10 @@
 		});
 
 		$(function () {
-			$('form').submit(function () {
-				socket.emit('chat message', $('#m').val());
-				$('#m').val('');
-				return false;
+			$('#myModal').modal({
+				backdrop: 'static',
+				keyboard: false
 			});
-
 
 			socket.on('chat message', function (msg) {
 				$('#messages').append($('<li>').text(msg));
@@ -201,7 +230,7 @@
 			socket.on('welcome', function (user) {
 				$("#welcome_text").text('Welcome, ' + user.user_name);
 
-				if(user.isHost) {
+				if (user.isHost) {
 					$("#scrum_master_panel").show();
 				} else {
 					$("#particiapnt_panel").show();
@@ -212,7 +241,7 @@
 				toastr.info(user.user_name + ' joined the scrum.');
 			});
 
-			socket.on('participant-list', function(participants) {
+			socket.on('participant-list', function (participants) {
 
 				$('#participant_list').empty();
 				_.each(participants, function (participant) {
@@ -220,70 +249,80 @@
 				});
 			});
 
-			socket.on('topic', function(details) {
+			socket.on('topic', function (details) {
 
-				if(details.topic != null) {
-				$("#user_story_number").text(details.topic.name);
-				$('#participant_list_points').empty();
-				_.each(details.clients, function (participant) {
+				if (details.topic != null) {
+					$("#no_topic").hide();
 
-					if(!participant.isHost) {
-						var ele = '<div class="col-sm-2 participant-points"><div class="card"><h4>' 
-									+ participant.user_name 
-									+ '</h4><p class="points">' + participant.points + '</p></div></div>'
-						
-						if(participant.points != 0) {
-							ele = '<div class="col-sm-2 participant-points"><div class="card points-received"><h4>' 
-									+ participant.user_name 
-									+ '</h4><p class="points">' + participant.points + '</p></div></div>';
+					$("#user_story_number").text(details.topic.name);
+					$('#participant_list_points').empty();
+					_.each(details.clients, function (participant) {
+
+						if (!participant.isHost) {
+							var ele = '<div class="col-sm-2 participant-points"><div class="card"><p>'
+								+ participant.user_name
+								+ '</p><span class="points">' + participant.points + '</span></div></div>'
+
+							if (participant.points != 0) {
+								ele = '<div class="col-sm-2 participant-points"><div class="card points-received"><p>'
+									+ participant.user_name
+									+ '</p><span class="points">' + participant.points + '</span></div></div>';
+							}
+
+							$('#participant_list_points').append($(ele));
 						}
+					});
 
-						$('#participant_list_points').append($(ele));
-					}
-				});
+					//TODO: check if the user is participant from local storage
+					$("#particiapnt_panel div.participant-card").css("background-color", "#337ab7");
+					$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
+				}
+				else {
+					$("#no_topic").show();
 
-				//TODO: check if the user is participant from local storage
-				$("#particiapnt_panel div.participant-card").css("background-color", "blue");
-				$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
-			}
-			else{
-				$("#user_story_number").text('');
-				$('#participant_list_points').empty();
-			}
+					$("#user_story_number").text('');
+					$('#participant_list_points').empty();
+
+					//TODO: check if the user is participant from local storage
+					$("#particiapnt_panel div.participant-card").css("background-color", "#484343");
+					$("#particiapnt_panel div.participant-card").css("cursor", "auto");
+				}
 			});
 
 			$("#btnUserLogin").click(function () {
-				
+
 				socket.emit('user-login-details', {
 					name: $("#userName").val(),
 					host: $("#isScrumMaster").prop('checked')
 				});
 			});
 
-			$("#btnSetTopic").click(function() {
+			$("#btnSetTopic").click(function () {
 				socket.emit('set-topic', {
 					name: $("#txt_topic").val()
 				});
 			});
 
-			$("#btnResetTopic").click(function(){
+			$("#btnResetTopic").click(function () {
+				$("#txt_topic").val('');
+
 				socket.emit('reset-topic');
 			})
 
-			$("#btnReveal").click(function(){
+			$("#btnReveal").click(function () {
 				socket.emit('show-points');
 			});
 
-			socket.on('show particiapnt points', function() {
+			socket.on('show particiapnt points', function () {
 				$('.points').css('display', 'block');
 			})
 
-			$(".participant-card").click(function(ele){
-				var enabled = ($(this).css("background-color") === 'rgb(0, 0, 255)');
-				if(enabled) {
+			$(".participant-card").click(function (ele) {
+				var enabled = ($(this).css("background-color") === 'rgb(51, 122, 183)');
+				if (enabled) {
 					var points = $(this).children(":first").text();
 					var r = confirm("Confirm your points - " + points);
-					if(r) {
+					if (r) {
 						//TODO: send to socket
 						socket.emit('send-points', {
 							socket_id: socket.id,
