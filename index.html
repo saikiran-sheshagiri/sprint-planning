@@ -191,11 +191,12 @@
 				<div class="modal-header">
 					<h4 class="modal-title">Login</h4>
 				</div>
+				<form>
 				<div class="modal-body">
 					<div class="alert alert-danger" id="host_joined">
 						<strong>Host already joined!</strong> If you are the real host, ask your participants to refresh and join as an attendee.
 					</div>
-					<form>
+					
 						<div class="form-group">
 							<input type="text" class="form-control" id="userName" placeholder="Enter your name" />
 
@@ -207,12 +208,13 @@
 										</label>
 							</div>
 						</div>
-					</form>
+					
 
 				</div>
 				<div class="modal-footer">
-					<button type="button" id="btnUserLogin" class="btn btn-primary">Join</button>
+					<button type="submit" id="btnUserLogin" class="btn btn-primary">Join</button>
 				</div>
+			</form>
 			</div>
 
 		</div>
@@ -230,6 +232,9 @@
 
 		$(window).load(function () {
 			$('#myModal').modal('show');
+			$('#myModal').on('shown.bs.modal', function() {
+        		$("#userName").focus();
+    		});
 		});
 
 		$(function () {
@@ -317,6 +322,8 @@
 					name: $("#userName").val(),
 					host: $("#isScrumMaster").prop('checked')
 				});
+
+				return false;
 			});
 
 			$("#btnSetTopic").click(function () {
