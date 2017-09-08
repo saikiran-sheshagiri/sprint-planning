@@ -27,23 +27,21 @@
 			border: #484343 1px solid;
 			height: 150px;
 			background-color: #484343;
-		}
-
-		.card p {
-			font-size: 18px;
-			text-transform: capitalize;
-			background-color: white;
+			font-size: 40px;
+			border-radius: 10px;
 		}
 
 		.participant-card {
 			border: #484343 1px solid;
 			height: 150px;
 			background-color: #484343;
+			font-size: 40px;
+			border-radius: 10px;
 		}
 
 		.participant-card p {
+			margin-top: 40px;
 			text-align: center;
-			font-size: 30px;
 			color: white;
 		}
 
@@ -57,9 +55,8 @@
 		}
 
 		.points {
-			height: 50px;
+			margin-top: 40px;
 			text-align: center;
-			font-size: 40px;
 			display: none;
 		}
 
@@ -289,14 +286,15 @@
 					_.each(details.clients, function (participant) {
 
 						if (!participant.isHost) {
-							var ele = '<div class="col-sm-2 participant-points"><div class="card"><p>'
+							var ele = '<div class="col-sm-2 participant-points"><p>'
 								+ participant.user_name
-								+ '</p><span class="points">' + participant.points + '</span></div></div>'
+								+ '</p><div class="card"><span class="points">' + participant.points + '</span></div></div>'
 
 							if (participant.points != 0) {
-								ele = '<div class="col-sm-2 participant-points"><div class="card points-received"><p>'
+								ele = '<div class="col-sm-2 participant-points"><p>'
 									+ participant.user_name
-									+ '</p><span class="points">' + participant.points + '</span></div></div>';
+									+ '</p><div class="card points-received"><span class="points">' 
+										+ participant.points + '</span></div></div>';
 							}
 
 							$('#participant_list_points').append($(ele));
