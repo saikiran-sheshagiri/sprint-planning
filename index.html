@@ -71,12 +71,42 @@
 		.all-participants li {
 			text-transform: capitalize;
 		}
-		
+
 		#welcome_text {
 			text-transform: uppercase;
 		}
 
 		#host_joined {
+			display: none;
+		}
+
+		.pointed-card {
+			background-color: #484343;
+
+			width: 50px;
+			height: 75px;
+			border: #484343 1px solid;
+			font-size: 40px;
+			border-radius: 10px;
+			margin: 5px;
+		}
+
+		.notpointed-card {
+			background-color: #76d276;
+
+			width: 50px;
+			height: 75px;
+			border: #484343 1px solid;
+			font-size: 40px;
+			border-radius: 10px;
+			margin: 5px;
+		}
+
+		#intro_participant {
+			display: none;
+		}
+
+		#intro_host {
 			display: none;
 		}
 	</style>
@@ -85,9 +115,8 @@
 	<link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 
 	<script>
-		function closeIt()
-		{
-		  return "Are you sure you want to leave the planning? (This action will disconnect you from planning)";
+		function closeIt() {
+			return "Are you sure you want to leave the planning? (This action will disconnect you from planning)";
 		}
 		window.onbeforeunload = closeIt;
 	</script>
@@ -105,13 +134,36 @@
 					<div class="panel-body">
 						<div id="participant_list_points" class="row">
 						</div>
-						<div class="container" id="no_topic">
-							<p>Wait for scrum master to select the topic or story</p>
+						<div id="no_topic">
+
+							<p>This zone is the pointing table. When a scrum master selects the story/topic, then all the participants and the process
+								of pointing will be shown here. The below notation of the cards (sample) tells us whether is participant is pointed or not.</p>
+							<div class="row">
+								<div class="col-sm-6">
+									<p>Alex</p>
+									<div class="notpointed-card">
+									</div>
+									<p><i>"Alex has pointed"</i></p>
+								</div>
+								<div class="col-sm-6">
+									<p>Bob</p>
+									<div class="pointed-card">
+									</div>
+									<p><i>"Bob has not yet pointed"</i></p>
+								</div>
+							</div>
+							<hr>
+						
+							<p id="intro_participant">Wait for scrum master to select the topic or story</p>
+							<p id="intro_host">Once every participant joined the app, select a topic or story number and use the below form to send it to all participants for pointing.</p>
 						</div>
 					</div>
 				</div>
 				<div class="panel panel-default" id="particiapnt_panel" style="display: none">
-					<div class="panel-heading">Point cards</div>
+					<div class="panel-heading">
+						Point cards
+						<p><i>Use the below cards to point a topic/story. When a topic/story is selected by Host then below cards turns blue and are selectable. Click on the cards to point.</i></p>
+					</div>
 					<div class="panel-body">
 						<div class="row">
 							<div class="participant-points col-sm-2">
@@ -168,8 +220,11 @@
 							<button class="btn btn-primary" id="btnSetTopic">Send</button>
 							<button class="btn btn-danger pull-right" id="btnResetTopic">Reset</button>
 						</div>
+						<br><br>
+						<p><i>If a participant looses connection and rejoins, then click the 'Send' button again to send the topic/userstory.</i></p>
+						<p><i>Use 'Reset' button when pointing is finished.</i></p>
 						<hr>
-						<p>Click reveal to see the points from participants</p>
+						<p>Click reveal to see the points from participants when every one finished pointing</p>
 						<p class="text-center">
 							<button class="btn btn-success btn-lg" id="btnReveal">Reveal</button>
 						</p>
@@ -200,11 +255,11 @@
 					<h4 class="modal-title">Login</h4>
 				</div>
 				<form>
-				<div class="modal-body">
-					<div class="alert alert-danger" id="host_joined">
-						<strong>Host already joined!</strong> If you are the real host, ask your participants to refresh and join as an attendee.
-					</div>
-					
+					<div class="modal-body">
+						<div class="alert alert-danger" id="host_joined">
+							<strong>Host already joined!</strong> If you are the real host, ask your participants to refresh and join as an attendee.
+						</div>
+
 						<div class="form-group">
 							<input type="text" class="form-control" id="userName" placeholder="Enter your name" />
 
@@ -216,13 +271,13 @@
 										</label>
 							</div>
 						</div>
-					
 
-				</div>
-				<div class="modal-footer">
-					<button type="submit" id="btnUserLogin" class="btn btn-primary">Join</button>
-				</div>
-			</form>
+
+					</div>
+					<div class="modal-footer">
+						<button type="submit" id="btnUserLogin" class="btn btn-primary">Join</button>
+					</div>
+				</form>
 			</div>
 
 		</div>
@@ -240,9 +295,9 @@
 
 		$(window).load(function () {
 			$('#myModal').modal('show');
-			$('#myModal').on('shown.bs.modal', function() {
-        		$("#userName").focus();
-    		});
+			$('#myModal').on('shown.bs.modal', function () {
+				$("#userName").focus();
+			});
 		});
 
 		$(function () {
@@ -266,8 +321,10 @@
 
 				if (user.isHost) {
 					$("#scrum_master_panel").show();
+					$("#intro_host").show();
 				} else {
 					$("#particiapnt_panel").show();
+					$("#intro_participant").show();
 				}
 			});
 
@@ -275,7 +332,7 @@
 				toastr.info(user.user_name + ' joined the planning.');
 			});
 
-			socket.on('user-left', function(user) {
+			socket.on('user-left', function (user) {
 				toastr.info(user.user_name + ' left planning.');
 			});
 
@@ -306,8 +363,8 @@
 							if (participant.points != 0) {
 								ele = '<div class="col-sm-2 participant-points"><p>'
 									+ participant.user_name
-									+ '</p><div class="card points-received"><span class="points">' 
-										+ participant.points + '</span></div></div>';
+									+ '</p><div class="card points-received"><span class="points">'
+									+ participant.points + '</span></div></div>';
 							}
 
 							$('#participant_list_points').append($(ele));
@@ -371,11 +428,11 @@
 				}
 			});
 
-			socket.on('enable-pointing', function() {
+			socket.on('enable-pointing', function () {
 
-					//TODO: check if the user is participant from local storage
-					$("#particiapnt_panel div.participant-card").css("background-color", "#337ab7");
-					$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
+				//TODO: check if the user is participant from local storage
+				$("#particiapnt_panel div.participant-card").css("background-color", "#337ab7");
+				$("#particiapnt_panel div.participant-card").css("cursor", "pointer");
 			});
 
 			socket.on('disable-points', function () {
